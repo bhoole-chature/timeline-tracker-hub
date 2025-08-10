@@ -91,19 +91,19 @@ export function Timeline() {
       const viewportHeight = window.innerHeight;
       const timelineHeight = timelineRef.current.offsetHeight;
       
-      // Calculate how much of the timeline is visible
+      // Calculate progress based on how much of timeline has scrolled past
       const timelineTop = timelineRect.top;
       const timelineBottom = timelineRect.bottom;
       
-      if (timelineTop <= viewportHeight && timelineBottom >= 0) {
+      if (timelineBottom >= 0 && timelineTop <= viewportHeight) {
         // Timeline is in viewport
-        const visibleTop = Math.max(0, -timelineTop);
-        const visibleHeight = Math.min(timelineHeight, viewportHeight - Math.max(0, timelineTop));
-        const progress = visibleTop / Math.max(1, timelineHeight - viewportHeight);
+        const scrolledPast = Math.max(0, viewportHeight - timelineTop);
+        const totalScrollDistance = timelineHeight + viewportHeight;
+        const progress = Math.min(1, Math.max(0, scrolledPast / totalScrollDistance));
         
-        setScrollProgress(Math.min(1, Math.max(0, progress)));
+        setScrollProgress(progress);
         
-        // Update active index based on scroll position
+        // Update active index based on progress
         const currentIndex = Math.floor(progress * timelineEvents.length);
         setActiveIndex(Math.min(timelineEvents.length - 1, Math.max(0, currentIndex)));
       }
@@ -117,25 +117,45 @@ export function Timeline() {
 
   return (
     <section className="py-20 relative overflow-hidden">
-      {/* Animated Background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-background">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,hsl(var(--primary)/0.1)_0%,transparent_50%)] animate-pulse" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_0%,hsl(var(--primary)/0.05),transparent)]" />
+      {/* Unified Animated Background */}
+      <div className="absolute inset-0">
+        {/* Main gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-background via-primary/5 to-background" />
+        
+        {/* Background geometric shapes */}
+        <div className="absolute top-20 left-10 w-32 h-32 border border-primary/10 rounded-full animate-pulse" />
+        <div className="absolute bottom-20 right-16 w-24 h-24 border border-primary/20 rotate-45 animate-bounce" style={{ animationDuration: '3s' }} />
+        <div className="absolute top-1/3 right-20 w-16 h-16 bg-primary/5 rounded-lg animate-pulse" style={{ animationDelay: '1s' }} />
+        <div className="absolute bottom-1/3 left-16 w-20 h-20 border-2 border-primary/10 rounded-full animate-pulse" style={{ animationDelay: '2s' }} />
+        
+        {/* Floating particles */}
+        <div className="absolute inset-0">
+          {[...Array(8)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-1 h-1 bg-primary/30 rounded-full animate-pulse"
+              style={{
+                left: `${10 + i * 12}%`,
+                top: `${20 + (i % 3) * 25}%`,
+                animationDelay: `${i * 0.5}s`,
+                animationDuration: `${2 + i * 0.3}s`
+              }}
+            />
+          ))}
+        </div>
       </div>
       
-      {/* Falling Light Effects */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(6)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute w-px h-32 bg-gradient-to-b from-transparent via-primary/30 to-transparent animate-falling-light"
-            style={{
-              left: `${15 + i * 15}%`,
-              animationDelay: `${i * 0.8}s`,
-              animationDuration: `${3 + i * 0.5}s`
-            }}
-          />
-        ))}
+      {/* Sticky Glowing Bulb */}
+      <div className="sticky top-8 left-1/2 transform -translate-x-1/2 z-30 pointer-events-none">
+        <div className="relative">
+          <div className="w-12 h-12 bg-primary/20 rounded-full border-2 border-primary/40 backdrop-blur-sm">
+            <div className="absolute inset-2 bg-primary/60 rounded-full animate-pulse" />
+            <div className="absolute inset-3 bg-primary rounded-full" />
+            <div className="absolute -inset-2 bg-primary/10 rounded-full animate-ping" />
+          </div>
+          {/* Light beam effect */}
+          <div className="absolute top-12 left-1/2 transform -translate-x-1/2 w-px h-32 bg-gradient-to-b from-primary/50 to-transparent" />
+        </div>
       </div>
       
       <div className="container mx-auto px-4 relative z-10">
