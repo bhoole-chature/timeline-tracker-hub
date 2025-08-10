@@ -117,7 +117,28 @@ export function Timeline() {
 
   return (
     <section className="py-20 relative overflow-hidden">
-      <div className="container mx-auto px-4">
+      {/* Animated Background */}
+      <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-background">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,hsl(var(--primary)/0.1)_0%,transparent_50%)] animate-pulse" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_0%,hsl(var(--primary)/0.05),transparent)]" />
+      </div>
+      
+      {/* Falling Light Effects */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {[...Array(6)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute w-px h-32 bg-gradient-to-b from-transparent via-primary/30 to-transparent animate-falling-light"
+            style={{
+              left: `${15 + i * 15}%`,
+              animationDelay: `${i * 0.8}s`,
+              animationDuration: `${3 + i * 0.5}s`
+            }}
+          />
+        ))}
+      </div>
+      
+      <div className="container mx-auto px-4 relative z-10">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold mb-4 bg-primary-gradient bg-clip-text text-transparent">
             Our Journey

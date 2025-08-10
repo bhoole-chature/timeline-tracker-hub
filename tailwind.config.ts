@@ -103,11 +103,30 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'falling-light': {
+					'0%': { 
+						transform: 'translateY(-100vh) scaleY(0)',
+						opacity: '0'
+					},
+					'10%': {
+						opacity: '1',
+						transform: 'translateY(-90vh) scaleY(1)'
+					},
+					'90%': {
+						opacity: '1',
+						transform: 'translateY(100vh) scaleY(1)'
+					},
+					'100%': {
+						opacity: '0',
+						transform: 'translateY(110vh) scaleY(0)'
+					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'falling-light': 'falling-light 4s ease-in-out infinite'
 			}
 		}
 	},
