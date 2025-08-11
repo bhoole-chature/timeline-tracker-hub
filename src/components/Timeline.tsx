@@ -1,80 +1,124 @@
 import { useEffect, useRef, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, Calendar, Trophy, Users, Lightbulb } from "lucide-react";
+import { CheckCircle, Calendar, Trophy, Users, Lightbulb, Code, Award, Rocket } from "lucide-react";
 
 interface TimelineEvent {
-  id: string;
-  title: string;
   date: string;
+  title: string;
   description: string;
-  type: "milestone" | "event" | "achievement" | "announcement";
-  status: "completed" | "active" | "upcoming";
+  type: "milestone" | "hackathon" | "showcase" | "partnership" | "graduation" | "launch";
+  participants: number | null;
+  icon: any;
+  status: "completed";
 }
 
-const timelineEvents: TimelineEvent[] = [
+interface TimelineYear {
+  year: string;
+  title: string;
+  events: TimelineEvent[];
+}
+
+const timelineEvents: TimelineYear[] = [
   {
-    id: "1",
-    title: "Platform Launch",
-    date: "January 2024",
-    description: "Official launch of our event management platform with over 1000 registered users in the first week.",
-    type: "milestone",
-    status: "completed"
+    year: "2024",
+    title: "RIDE Expansion & Growth",
+    events: [
+      {
+        date: "March 2024",
+        title: "RIDEHack 3.0",
+        description: "Third annual hackathon with 200+ participants, 50 innovative solutions, and ₹5L in prizes.",
+        type: "hackathon",
+        participants: 200,
+        icon: Code,
+        status: "completed"
+      },
+      {
+        date: "June 2024",
+        title: "Startup Showcase Summit",
+        description: "Major investor meet featuring 17 portfolio startups, leading to ₹45L funding commitments.",
+        type: "showcase",
+        participants: 150,
+        icon: Trophy,
+        status: "completed"
+      },
+      {
+        date: "September 2024",
+        title: "Industry Partnership Day",
+        description: "Collaborated with 10+ industry partners to create mentorship and internship opportunities.",
+        type: "partnership",
+        participants: 80,
+        icon: Lightbulb,
+        status: "completed"
+      }
+    ]
   },
   {
-    id: "2",
-    title: "Tech Summit 2024",
-    date: "March 2024",
-    description: "Our biggest conference yet with 500+ attendees, 20 speakers, and groundbreaking tech announcements.",
-    type: "event",
-    status: "completed"
+    year: "2023",
+    title: "Milestone Year",
+    events: [
+      {
+        date: "February 2023",
+        title: "DPIIT Recognition Achieved",
+        description: "Officially recognized by Department for Promotion of Industry and Internal Trade, Government of India.",
+        type: "milestone",
+        participants: null,
+        icon: Award,
+        status: "completed"
+      },
+      {
+        date: "May 2023",
+        title: "RIDEHack 2.0",
+        description: "Second edition with focus on sustainable technology solutions, 150 participants across 30 teams.",
+        type: "hackathon",
+        participants: 150,
+        icon: Code,
+        status: "completed"
+      },
+      {
+        date: "October 2023",
+        title: "First Startup Graduations",
+        description: "Four startups successfully graduated from incubation program with combined funding of ₹80L.",
+        type: "graduation",
+        participants: 50,
+        icon: Rocket,
+        status: "completed"
+      }
+    ]
   },
   {
-    id: "3",
-    title: "Community Milestone",
-    date: "June 2024",
-    description: "Reached 10,000 active community members and launched our mentorship program.",
-    type: "achievement",
-    status: "completed"
-  },
-  {
-    id: "4",
-    title: "AI Workshop Series",
-    date: "September 2024",
-    description: "Launched comprehensive AI workshop series covering machine learning, deep learning, and practical applications.",
-    type: "event",
-    status: "active"
-  },
-  {
-    id: "5",
-    title: "Global Expansion",
-    date: "December 2024",
-    description: "Expanding our events to 15 new cities worldwide, bringing our community closer together.",
-    type: "announcement",
-    status: "upcoming"
-  },
-  {
-    id: "6",
-    title: "Innovation Awards",
-    date: "February 2025",
-    description: "Annual innovation awards ceremony celebrating the best projects and contributions from our community.",
-    type: "event",
-    status: "upcoming"
+    year: "2022",
+    title: "Foundation & Growth",
+    events: [
+      {
+        date: "August 2022",
+        title: "RIDE Incubation Centre Launch",
+        description: "Official launch of RIDE with state-of-the-art facilities and inaugural batch of 8 startups.",
+        type: "launch",
+        participants: 100,
+        icon: Rocket,
+        status: "completed"
+      },
+      {
+        date: "November 2022",
+        title: "First RIDEHack",
+        description: "Inaugural hackathon focusing on innovative solutions for local challenges, 100+ participants.",
+        type: "hackathon",
+        participants: 100,
+        icon: Code,
+        status: "completed"
+      }
+    ]
   }
 ];
 
-const typeIcons = {
-  milestone: Trophy,
-  event: Calendar,
-  achievement: CheckCircle,
-  announcement: Lightbulb
-};
-
 const typeColors = {
   milestone: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
-  event: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-  achievement: "bg-green-500/10 text-green-400 border-green-500/20",
-  announcement: "bg-purple-500/10 text-purple-400 border-purple-500/20"
+  hackathon: "bg-blue-500/10 text-blue-400 border-blue-500/20",
+  showcase: "bg-green-500/10 text-green-400 border-green-500/20",
+  partnership: "bg-purple-500/10 text-purple-400 border-purple-500/20",
+  graduation: "bg-orange-500/10 text-orange-400 border-orange-500/20",
+  launch: "bg-red-500/10 text-red-400 border-red-500/20"
 };
 
 export function Timeline() {
@@ -82,6 +126,9 @@ export function Timeline() {
   const [scrollProgress, setScrollProgress] = useState(0);
   const timelineRef = useRef<HTMLDivElement>(null);
   const ballRef = useRef<HTMLDivElement>(null);
+
+  // Flatten events for progress calculation
+  const allEvents = timelineEvents.flatMap(year => year.events);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -105,8 +152,8 @@ export function Timeline() {
         setScrollProgress(progress);
         
         // Update active index - ensure we reach the last item
-        const currentIndex = Math.floor(progress * (timelineEvents.length - 1));
-        setActiveIndex(Math.min(timelineEvents.length - 1, Math.max(0, currentIndex)));
+        const currentIndex = Math.floor(progress * (allEvents.length - 1));
+        setActiveIndex(Math.min(allEvents.length - 1, Math.max(0, currentIndex)));
       }
     };
 
@@ -114,7 +161,7 @@ export function Timeline() {
     handleScroll(); // Initial call
     
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [allEvents.length]);
 
   return (
     <section className="py-20 relative overflow-hidden">
@@ -237,59 +284,91 @@ export function Timeline() {
           </div>
 
           {/* Timeline Events */}
-          <div className="space-y-16">
-            {timelineEvents.map((event, index) => {
-              const isActive = index <= activeIndex;
-              const isLeft = index % 2 === 0;
-              const IconComponent = typeIcons[event.type];
+          <div className="space-y-20">
+            {timelineEvents.map((yearData, yearIndex) => {
+              let eventCounter = 0;
+              // Count events in previous years
+              for (let i = 0; i < yearIndex; i++) {
+                eventCounter += timelineEvents[i].events.length;
+              }
 
               return (
-                <div
-                  key={event.id}
-                  className={`flex items-center ${isLeft ? 'flex-row' : 'flex-row-reverse'} relative`}
-                >
-                  {/* Checkpoint */}
-                  <div className="absolute left-1/2 transform -translate-x-1/2 z-20">
-                    <div
-                      className={`w-4 h-4 rounded-full border-4 transition-all duration-500 ${
-                        isActive 
-                          ? 'bg-primary border-primary shadow-glow-primary' 
-                          : 'bg-timeline-bg border-timeline-inactive'
-                      }`}
-                    />
+                <div key={yearData.year} className="relative">
+                  {/* Year Section Header */}
+                  <div className="absolute left-1/2 transform -translate-x-1/2 z-30 mb-8">
+                    <div className="bg-primary text-primary-foreground px-6 py-3 rounded-full font-bold text-lg shadow-glow-primary">
+                      {yearData.year}
+                    </div>
+                    <div className="text-center mt-2">
+                      <h3 className="text-xl font-semibold text-foreground">{yearData.title}</h3>
+                    </div>
                   </div>
 
-                  {/* Content Card */}
-                  <div className={`w-5/12 ${isLeft ? 'pr-8' : 'pl-8'}`}>
-                    <Card 
-                      className={`bg-card/50 backdrop-blur-sm border transition-all duration-500 transform ${
-                        isActive 
-                          ? 'border-primary/30 shadow-glow-secondary translate-y-0 opacity-100' 
-                          : 'border-border/50 translate-y-4 opacity-60'
-                      }`}
-                    >
-                      <CardHeader className="pb-3">
-                        <div className="flex items-center justify-between mb-2">
-                          <Badge className={typeColors[event.type]}>
-                            <IconComponent className="w-3 h-3 mr-1" />
-                            {event.type.charAt(0).toUpperCase() + event.type.slice(1)}
-                          </Badge>
-                          <span className="text-sm text-muted-foreground">{event.date}</span>
+                  {/* Year Events */}
+                  <div className="space-y-16 pt-24">
+                    {yearData.events.map((event, eventIndex) => {
+                      const globalIndex = eventCounter + eventIndex;
+                      const isActive = globalIndex <= activeIndex;
+                      const isLeft = globalIndex % 2 === 0;
+                      const IconComponent = event.icon;
+
+                      return (
+                        <div
+                          key={`${yearData.year}-${eventIndex}`}
+                          className={`flex items-center ${isLeft ? 'flex-row' : 'flex-row-reverse'} relative`}
+                        >
+                          {/* Checkpoint */}
+                          <div className="absolute left-1/2 transform -translate-x-1/2 z-20">
+                            <div
+                              className={`w-4 h-4 rounded-full border-4 transition-all duration-500 ${
+                                isActive 
+                                  ? 'bg-primary border-primary shadow-glow-primary' 
+                                  : 'bg-timeline-bg border-timeline-inactive'
+                              }`}
+                            />
+                          </div>
+
+                          {/* Content Card */}
+                          <div className={`w-5/12 ${isLeft ? 'pr-8' : 'pl-8'}`}>
+                            <Card 
+                              className={`bg-card/50 backdrop-blur-sm border transition-all duration-500 transform ${
+                                isActive 
+                                  ? 'border-primary/30 shadow-glow-secondary translate-y-0 opacity-100' 
+                                  : 'border-border/50 translate-y-4 opacity-60'
+                              }`}
+                            >
+                              <CardHeader className="pb-3">
+                                <div className="flex items-center justify-between mb-2">
+                                  <Badge className={typeColors[event.type]}>
+                                    <IconComponent className="w-3 h-3 mr-1" />
+                                    {event.type.charAt(0).toUpperCase() + event.type.slice(1)}
+                                  </Badge>
+                                  <span className="text-sm text-muted-foreground">{event.date}</span>
+                                </div>
+                                <CardTitle className="text-lg font-semibold text-foreground">
+                                  {event.title}
+                                </CardTitle>
+                              </CardHeader>
+                              <CardContent>
+                                <p className="text-muted-foreground text-sm leading-relaxed mb-3">
+                                  {event.description}
+                                </p>
+                                {event.participants && (
+                                  <div className="flex items-center text-xs text-muted-foreground">
+                                    <Users className="w-3 h-3 mr-1" />
+                                    {event.participants} participants
+                                  </div>
+                                )}
+                              </CardContent>
+                            </Card>
+                          </div>
+
+                          {/* Spacer for opposite side */}
+                          <div className="w-5/12" />
                         </div>
-                        <CardTitle className="text-lg font-semibold text-foreground">
-                          {event.title}
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-muted-foreground text-sm leading-relaxed">
-                          {event.description}
-                        </p>
-                      </CardContent>
-                    </Card>
+                      );
+                    })}
                   </div>
-
-                  {/* Spacer for opposite side */}
-                  <div className="w-5/12" />
                 </div>
               );
             })}
